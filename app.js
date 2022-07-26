@@ -7,42 +7,35 @@ function getJOKES(e) {
     // Get number of jokes that you specified
     const number = document.querySelector('input[type="number"]').value;
 
-    // so now we have to number => we can prepare our request (xhr)
-    const xhr = new XMLHttpRequest();
+    // I instaniate an object from the library that I made
+    const http = new easyHTTP();
 
-    xhr.open('GET', `http://api.icndb.com/jokes/random/${number}`, true);
+    http.get(`http://api.icndb.com/jokes/random/${number}`, function(err, result) {
+        let output = '';
 
-    xhr.onload = function() {
-        if(this.status === 200) {
-            const response = JSON.parse(this.responseText);
-
-            let output = '';
-            // Because every joke has 'type' wheather success or not so
-            if(response.type === 'success') {
-                // ===> I don't want to loop through 'type' so :
-
-                // WAY 1
-                // for(let i = 0; i < response.value.length; i++) {
-                //     console.log(response.value[i]);
-                // }
-
-                // WAY 2
-                response.value.forEach(function(joke, index) {
-                    output += `
-                        <h5>JOKE: ${index + 1}</h5>
-                        <img src="giphy1.gif" class="logo-joke"></div>
-                        <li>${joke.joke}</li>
-                    `;
-                });
-
-            } else {
-                output += `<li>Something went wrong`;
-            }
-
-            const displayJOKE = document.querySelector('.jokes');
-            displayJOKE.innerHTML = output;
+        if(err) {
+          output += `
+            <li>Something went wrong</li>
+          `;
+          
+        } else {
+            const response = JSON.parse(result);
+            // I recieve the array with a type wheather success or not
+            // type = success && value = [{}, {}, {}, ...]
+            // and I want to loop just through the value 'jokes'
+            response.value.forEach(function(joke, index) {
+                output += `
+                    <h5>JOKE: ${index + 1}</h5>
+                    <img src="giphy1.gif" class="logo-joke"></div>
+                    <li>${joke.joke}</li>
+                `;
+            });
         }
-    }
-    
-    xhr.send();
+
+        const list = document.querySelector('.jokes');
+        list.innerHTML = output;
+
+        // Clear the input
+        document.querySelector('input[type="number"]').value = '';
+    });
 }
